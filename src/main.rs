@@ -1,3 +1,6 @@
+mod models;
+mod schema;
+
 use std::env;
 
 use diesel::{Connection, PgConnection};

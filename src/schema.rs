@@ -9,6 +9,7 @@ diesel::table! {
         public_id -> Uuid,
         created_at -> Nullable<Timestamp>,
         completed -> Bool,
+        user_id -> Int4,
     }
 }
 
@@ -19,6 +20,8 @@ diesel::table! {
         created_at -> Nullable<Timestamp>,
     }
 }
+
+diesel::joinable!(todos -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     todos,
