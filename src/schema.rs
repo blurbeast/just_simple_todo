@@ -7,9 +7,10 @@ diesel::table! {
         #[max_length = 1000]
         description -> Nullable<Varchar>,
         public_id -> Uuid,
-        created_at -> Nullable<Timestamp>,
+        created_at -> Nullable<Varchar>,
         completed -> Bool,
         user_id -> Int4,
+        updated_at -> Nullable<Varchar>,
     }
 }
 
@@ -17,7 +18,7 @@ diesel::table! {
     users (id) {
         id -> Int4,
         alias -> Varchar,
-        created_at -> Nullable<Timestamp>,
+        created_at -> Nullable<Varchar>,
     }
 }
 
