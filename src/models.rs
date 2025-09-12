@@ -1,12 +1,13 @@
 use crate::schema::{todos, users};
 use diesel::{Insertable, PgConnection, Queryable, RunQueryDsl, Selectable, SelectableHelper};
+use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Debug, Selectable, Queryable)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
-    // pub id: i32,
+    pub id: i32,
     pub alias: String,
     pub password: String,
     pub created_at: Option<String>,
@@ -32,7 +33,7 @@ impl NewUser {
 #[diesel(table_name = todos)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Todo {
-    pub id: i32,
+    // pub id: i32,
     pub title: String,
     pub description: Option<String>,
     pub created_at: Option<String>,
@@ -47,4 +48,18 @@ pub struct NewTodo {
     pub title: String,
     pub description: Option<String>,
     pub public_id: Uuid,
+    pub user_id: i32
+}
+
+#[derive(Deserialize)]
+pub struct CreateTodoDto {
+    pub title: String,
+    pub description: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateTodoDto {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub completed: Option<bool>,
 }

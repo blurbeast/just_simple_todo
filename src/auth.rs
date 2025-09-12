@@ -116,6 +116,6 @@ pub async fn get_authenticated_user(headers: &axum::http::HeaderMap, pool: &mut 
     .map_err(|e| format!("Token invalid: {}", e))?;
 
     let user = destructure_to_user(get_user_or_throw(pool, token_data.claims.sub).await);
-    
+
     Ok(user)
 }

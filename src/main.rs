@@ -7,10 +7,7 @@ mod route;
 mod schema;
 
 use crate::app::AppState;
-use axum::Router;
 use dotenvy::dotenv;
-use std::env;
-use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 #[tokio::main]

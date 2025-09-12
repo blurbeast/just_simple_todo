@@ -11,7 +11,7 @@ pub struct AppState {
 }
 type Config = Arc<AppState>;
 impl AppState {
-    pub fn new() -> Arc<Self> {
+    pub fn new() -> Self {
         let port = set_env_var("PORT")
             .parse::<u16>()
             .expect("could not parse provided port");
@@ -21,12 +21,12 @@ impl AppState {
 
         let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
-        Arc::new(AppState {
+       AppState {
             db_pool,
             db_url,
             port,
             listen_address: addr,
-        })
+        }
     }
 }
 
