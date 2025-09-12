@@ -1,5 +1,7 @@
 mod models;
 mod schema;
+mod handlers;
+mod auth;
 
 use std::env;
 
