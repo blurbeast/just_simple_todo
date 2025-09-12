@@ -1,28 +1,25 @@
-mod models;
-mod schema;
-mod handlers;
+mod app;
 mod auth;
 mod db;
-mod app;
+mod handlers;
+mod models;
 mod route;
+mod schema;
 
-use std::env;
-use std::net::SocketAddr;
+use crate::app::AppState;
 use axum::Router;
 use dotenvy::dotenv;
+use std::env;
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use crate::app::AppState;
 
 #[tokio::main]
 async fn main() {
-
     dotenv().ok();
-
 
     let app_state = AppState::new();
 
     let listener = TcpListener::bind(&app_state.listen_address)
         .await
         .expect("could not listen to the specified port");
-
 }
