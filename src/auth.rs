@@ -1,10 +1,17 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
-use bcrypt::{hash, DEFAULT_COST};
+use bcrypt::{hash, verify, DEFAULT_COST};
+use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::app::AppState;
+use time::{Duration, OffsetDateTime};
+use crate::app::{set_env_var, AppState};
+use crate::handlers::{get_user_or_throw, save_new_user};
+use crate::models::{NewUser, User};
+use crate::schema::users::alias;
+use crate::schema::users::dsl::users;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -22,9 +29,9 @@ struct AuthRequest {
 pub struct LoginResponse {
     pub token: String
 }
-pub fn register
+pub async fn register
 (
-    state: State<AppState>,
+    mut state: State<AppState>,
     Json(payload): Json<AuthRequest>,
 ) -> (StatusCode, Json<serde_json::Value>)
 {
@@ -44,8 +51,52 @@ pub fn register
             );
         }
     };
+    let new_user = NewUser::new(payload.alias, password_hash);
+    let _ = save_new_user(&mut state.db_pool, new_user);
 
-
+    (StatusCode::CREATED, Json(json!({"status": "registered"})))
 }
 
-pub fn login() {}
+pub async fn login(
+    mut state: State<AppState>,
+    Json(payload): Json<AuthRequest>
+) -> (StatusCode, Json<serde_json::Value>) {
+    // let alias = payload.alias.clone();
+    match get_user_or_throw(&mut state.db_pool, payload.alias).await {
+        Ok(user) => {
+            match verify(&payload.password, &user.password) {
+                Ok(true) => {
+                    let expiration = (OffsetDateTime::now_utc() + Duration::hours(1)).unix_timestamp();
+                    let claims = Claims {
+                        sub: user.alias,
+                        exp: expiration,
+                    };
+
+                    let JWT_SECRET = set_env_var("JWT_SECRET");
+                    let header = Header::default();
+                    match encode(&header, &claims, &EncodingKey::from_secret(JWT_SECRET.as_ref())) {
+                        Ok(token) => (
+                            StatusCode::OK,
+                            Json(json!({ "token": token })),
+                        ),
+                        Err(e) => (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(json!({ "error": format!("token error: {}", e) })),
+                        ),
+                    }
+                }
+                _ => (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({"error": "invalid username or password"})),
+                ),
+            }
+        }
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "status": "error",
+                "message": "User not found"
+            })),
+        ),
+    }
+}
