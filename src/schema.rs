@@ -19,6 +19,7 @@ diesel::table! {
         id -> Int4,
         alias -> Varchar,
         created_at -> Nullable<Varchar>,
+        password -> Varchar,
     }
 }
 
