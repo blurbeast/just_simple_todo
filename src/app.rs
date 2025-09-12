@@ -1,36 +1,22 @@
-use diesel::pg::PgConnection;
-use diesel::r2d2::{self, ConnectionManager};
-use std::net::SocketAddr;
 use crate::db::run_db_connection;
+use crate::AppState;
 
-pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+impl AppState {
+    pub fn new() -> Self {
 
-// struct AppState {
-//     pub db_pool: DbPool,
-//     pub db_url: String,
-//     pub port: u16,
-//     pub listen_address: SocketAddr,
-// }
-// 
-// impl AppState {
-//     pub fn new() -> Self {
-//         let port = set_env_var("PORT")
-//             .parse::<u16>()
-//             .expect("could not parse provided port");
-//         let db_url = set_env_var("DATABASE_URL");
-// 
-//         let db_pool = run_db_connection(&*db_url);
-// 
-//         let addr = SocketAddr::from(([127, 0, 0, 1], port));
-// 
-//         AppState {
-//             db_pool,
-//             db_url,
-//             port,
-//             listen_address: addr,
-//         }
-//     }
-// }
+        let db_url = set_env_var("DATABASE_URL");
+
+        let db_pool = run_db_connection(&db_url);
+
+        let listen_address = std::env::var("LISTEN_ADDRESS")
+            .unwrap_or_else(|_| "0.0.0.0:3000".to_string());
+
+        AppState {
+            db_pool,
+            listen_address: listen_address.parse().expect("Invalid listen address")
+        }
+    }
+}
 
 pub(crate) fn set_env_var(name: &str) -> String {
     std::env::var(name).expect("could not read from the environment")

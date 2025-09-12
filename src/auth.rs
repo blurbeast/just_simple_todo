@@ -1,16 +1,16 @@
-use crate::app::{set_env_var, };
+use crate::app::set_env_var;
 use crate::handlers::{get_user_or_throw, save_new_user};
 use crate::models::{NewUser, User};
+use crate::AppState;
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
-use bcrypt::{hash, verify, DEFAULT_COST};
+use bcrypt::{hash, DEFAULT_COST};
 use jsonwebtoken::{encode, DecodingKey, EncodingKey, Header, Validation};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::json;
 use std::sync::Arc;
 use time::{Duration, OffsetDateTime};
-use crate::AppState;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -55,7 +55,6 @@ pub async fn register(
         alias: payload.alias,
         password: password_hash,
     };
-
     save_new_user(State(state), new_user).await
 }
 

@@ -13,6 +13,14 @@ pub struct User {
     pub created_at: Option<String>,
 }
 
+#[derive(Debug, Selectable, Queryable, Serialize, Deserialize)]
+#[diesel(table_name = crate::schema::users)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct ClientUser {
+    pub alias: String,
+    pub created_at: Option<String>,
+}
+
 #[derive(Debug, Insertable)]
 #[diesel(table_name = users)]
 pub struct NewUser {
